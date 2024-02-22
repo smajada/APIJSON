@@ -13,8 +13,6 @@ class CreateArticleTest extends TestCase
     /** @test */
     public function can_create_articles()
     {
-        $this->withoutExceptionHandling();
-
         $response = $this->postJson(route('api.v1.articles.store'), [
             'title' => 'Nuevo artículo',
             'slug' => 'nuevo-articulo',

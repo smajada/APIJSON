@@ -12,6 +12,27 @@ trait MakesJsonApiRequests
 {
     protected bool $formatJsonApiDocument = true;
 
+    /**
+     * @param $uri
+     * @param array $data
+     * @return array
+     */
+    public function getFormattedData($uri, array $data): array
+    {
+        $path = parse_url($uri)['path'];
+        $type = (string)Str::of($path)->after('api/v1/')->before('/');
+        $id = (string)Str::of($path)->after($type)->replace('/', '');
+
+        return [
+            'data' => array_filter([
+                'type' => $type,
+                'id' => $id,
+                'attributes' => $data
+            ])
+
+        ];
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -32,12 +53,11 @@ trait MakesJsonApiRequests
         $headers['accept'] = 'application/vnd.api+json';
 
         if ($this->formatJsonApiDocument) {
-            $formatedData['data']['attributes'] = $data;
-            $formatedData['data']['type'] = (string)Str::of($uri)->before('api/v1/');
+            $formattedData = $this->getFormattedData($uri, $data);
         }
 
 
-        return parent::json($method, $uri, $formatedData ?? $data, $headers);
+        return parent::json($method, $uri, $formattedData ?? $data, $headers);
     }
 
     public function postJson($uri, array $data = [], array $headers = [], $options = 0): TestResponse
