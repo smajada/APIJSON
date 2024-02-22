@@ -10,6 +10,8 @@ use PHPUnit\Framework\ExpectationFailedException;
 
 trait MakesJsonApiRequests
 {
+    protected bool $formatJsonApiDocument = true;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -20,11 +22,22 @@ trait MakesJsonApiRequests
         );
     }
 
+    public function withoutJsonApiDocumentFormatting(): void
+    {
+        $this->formatJsonApiDocument = false;
+    }
+
     public function json($method, $uri, array $data = [], array $headers = [], $options = 0): TestResponse
     {
         $headers['accept'] = 'application/vnd.api+json';
 
-        return parent::json($method, $uri, $data, $headers);
+        if ($this->formatJsonApiDocument) {
+            $formatedData['data']['attributes'] = $data;
+            $formatedData['data']['type'] = (string)Str::of($uri)->before('api/v1/');
+        }
+
+
+        return parent::json($method, $uri, $formatedData ?? $data, $headers);
     }
 
     public function postJson($uri, array $data = [], array $headers = [], $options = 0): TestResponse
@@ -47,7 +60,7 @@ trait MakesJsonApiRequests
             /** @var TestResponse $this */
 
             $pointer = Str::of($attribute)->startsWith('data')
-                ? "/".str_replace('.', '/', $attribute)
+                ? "/" . str_replace('.', '/', $attribute)
                 : "/data/attributes/{$attribute}";
 
             try {
@@ -57,7 +70,7 @@ trait MakesJsonApiRequests
             } catch (ExpectationFailedException $e) {
                 PHPUnit::fail(
                     "Failed to find a JSON:API validation error for key: '{$attribute}'"
-                    .PHP_EOL.PHP_EOL.
+                    . PHP_EOL . PHP_EOL .
                     $e->getMessage()
                 );
             }
@@ -71,7 +84,7 @@ trait MakesJsonApiRequests
             } catch (ExpectationFailedException $e) {
                 PHPUnit::fail(
                     "Failed to find a valid JSON:API error response"
-                    .PHP_EOL.PHP_EOL.
+                    . PHP_EOL . PHP_EOL .
                     $e->getMessage()
                 );
             }

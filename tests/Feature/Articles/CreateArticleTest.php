@@ -16,17 +16,10 @@ class CreateArticleTest extends TestCase
         $this->withoutExceptionHandling();
 
         $response = $this->postJson(route('api.v1.articles.store'), [
-            'data' => [
-                'type' => 'articles',
-                'attributes' => [
-                    'title' => 'Nuevo artículo',
-                    'slug' => 'nuevo-articulo',
-                    'content' => 'Contenido del artículo'
-                ]
-            ]
-        ]);
-
-        $response->assertCreated();
+            'title' => 'Nuevo artículo',
+            'slug' => 'nuevo-articulo',
+            'content' => 'Contenido del artículo'
+        ])->assertCreated();
 
         $article = Article::first();
 
@@ -34,6 +27,7 @@ class CreateArticleTest extends TestCase
             'Location',
             route('api.v1.articles.show', $article)
         );
+
 
         $response->assertExactJson([
             'data' => [
@@ -54,65 +48,45 @@ class CreateArticleTest extends TestCase
     /** @test */
     public function title_is_required()
     {
-        $response = $this->postJson(route('api.v1.articles.store'), [
-            'data' => [
-                'type' => 'articles',
-                'attributes' => [
-                    'slug' => 'nuevo-articulo',
-                    'content' => 'Contenido del artículo'
-                ]
-            ]
-        ]);
+        $this->postJson(route('api.v1.articles.store'), [
 
-        $response->assertJsonApiValidationErrors('title');
+            'slug' => 'nuevo-articulo',
+            'content' => 'Contenido del artículo'
+
+        ])->assertJsonApiValidationErrors('title');
     }
 
     /** @test */
     public function title_must_be_at_least_4_characters()
     {
-        $response = $this->postJson(route('api.v1.articles.store'), [
-            'data' => [
-                'type' => 'articles',
-                'attributes' => [
-                    'title' => 'Nue',
-                    'slug' => 'nuevo-articulo',
-                    'content' => 'Contenido del artículo'
-                ]
-            ]
-        ]);
+        $this->postJson(route('api.v1.articles.store'), [
 
-        $response->assertJsonApiValidationErrors('title');
+            'title' => 'Nue',
+            'slug' => 'nuevo-articulo',
+            'content' => 'Contenido del artículo'
+
+        ])->assertJsonApiValidationErrors('title');
     }
 
     /** @test */
     public function slug_is_required()
     {
-        $response = $this->postJson(route('api.v1.articles.store'), [
-            'data' => [
-                'type' => 'articles',
-                'attributes' => [
-                    'title' => 'Nuevo Articulo',
-                    'content' => 'Contenido del artículo'
-                ]
-            ]
-        ]);
+        $this->postJson(route('api.v1.articles.store'), [
 
-        $response->assertJsonApiValidationErrors('slug');
+            'title' => 'Nuevo Articulo',
+            'content' => 'Contenido del artículo'
+
+        ])->assertJsonApiValidationErrors('slug');
     }
 
     /** @test */
     public function content_is_required()
     {
-        $response = $this->postJson(route('api.v1.articles.store'), [
-            'data' => [
-                'type' => 'articles',
-                'attributes' => [
-                    'title' => 'Nuevo Articulo',
-                    'slug' => 'nuevo-articulo'
-                ]
-            ]
-        ]);
+        $this->postJson(route('api.v1.articles.store'), [
 
-        $response->assertJsonApiValidationErrors('content');
+            'title' => 'Nuevo Articulo',
+            'slug' => 'nuevo-articulo'
+
+        ])->assertJsonApiValidationErrors('content');
     }
 }
