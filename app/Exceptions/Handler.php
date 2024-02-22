@@ -60,7 +60,9 @@ class Handler extends ExceptionHandler
                         ]
                     ];
                 })->values()
-        ], 422);
+        ], 422, [
+            'Content-Type' => 'application/vnd.api+json'
+        ]);
     }
 
 
