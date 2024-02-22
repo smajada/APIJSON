@@ -10,7 +10,7 @@ class CreateArticleTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+       /** @test */
     public function can_create_articles(): void
     {
         $this->withoutExceptionHandling();
@@ -57,27 +57,13 @@ class CreateArticleTest extends TestCase
             'data' => [
                 'type' => 'articles',
                 'attributes' => [
-                    'title' => 'fd',
                     'slug' => 'nuevo-articulo',
                     'content' => 'Contenido del artículo'
                 ]
             ]
-        ])->dump();
+        ]);
 
-        $response->assertJsonStructure([
-            'errors' => [
-               ['title', 'detail', 'source' => ['pointer']]
-            ]
-        ])->assertJsonFragment([
-            'source' => [
-                'pointer' => '/data/attributes/title'
-            ]
-        ])->assertHeader(
-            'Content-Type',
-            'application/vnd.api+json'
-        )->assertStatus(422);
-
-//        $response->assertJsonValidationErrors('data.attributes.title');
+        $response->assertJsonApiValidationErrors('title');
 
     }
 
@@ -95,7 +81,7 @@ class CreateArticleTest extends TestCase
             ]
         ]);
 
-        $response->assertJsonValidationErrors('data.attributes.title');
+        $response->assertJsonApiValidationErrors('title');
 
     }
 
@@ -112,7 +98,7 @@ class CreateArticleTest extends TestCase
             ]
         ])->dump();
 
-        $response->assertJsonValidationErrors('data.attributes.slug');
+        $response->assertJsonApiValidationErrors('slug');
 
     }
 
@@ -129,7 +115,7 @@ class CreateArticleTest extends TestCase
             ]
         ])->dump();
 
-        $response->assertJsonValidationErrors('data.attributes.content');
+        $response->assertJsonApiValidationErrors('content');
 
     }
 
