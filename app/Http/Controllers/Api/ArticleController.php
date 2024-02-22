@@ -21,7 +21,7 @@ class ArticleController extends Controller
 
     }
 
-    public function create(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'data.attributes.title' => ['required', 'min:4'],
