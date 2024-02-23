@@ -61,7 +61,7 @@ class PaginateArticlesTest extends TestCase
     }
 
     /** @test */
-    public function can_paginate_articles_and_sort_articles(): void
+    public function can_paginate_articles_sorted_articles(): void
     {
         Article::factory()->create(['title' => 'C Title']);
         Article::factory()->create(['title' => 'A Title']);
@@ -95,6 +95,38 @@ class PaginateArticlesTest extends TestCase
         $this->assertStringContainsString('sort=title', $lastLink);
         $this->assertStringContainsString('sort=title', $prevLink);
         $this->assertStringContainsString('sort=title', $nextLink);
+
+    }
+
+    /** @test */
+    public function can_paginate_articles_filtered_articles(): void
+    {
+        Article::factory(3)->create();
+        Article::factory()->create(['title' => 'C Laravel']);
+        Article::factory()->create(['title' => 'A Laravel']);
+        Article::factory()->create(['title' => 'B Laravel']);
+
+
+        // articles?filter[title]=laravel&page[size]=2&page[number]=2
+        $url = route('api.v1.articles.index', [
+            'filter[title]' => 'laravel',
+            'page' => [
+                'size' => 1,
+                'number' => 2,
+            ]
+        ]);
+
+        $response = $this->getJson($url);
+
+        $firstLink = urldecode($response->json('links.first'));
+        $lastLink = urldecode($response->json('links.last'));
+        $prevLink = urldecode($response->json('links.prev'));
+        $nextLink = urldecode($response->json('links.next'));
+
+        $this->assertStringContainsString('filter[title]=laravel', $firstLink);
+        $this->assertStringContainsString('filter[title]=laravel', $lastLink);
+        $this->assertStringContainsString('filter[title]=laravel', $prevLink);
+        $this->assertStringContainsString('filter[title]=laravel', $nextLink);
 
     }
 }

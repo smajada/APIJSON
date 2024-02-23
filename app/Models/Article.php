@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,15 +23,11 @@ class Article extends Model
      *
      * @var array
      */
-    protected $casts = [
-        'id' => 'string',
-        'category_id' => 'integer',
-        'user_id' => 'integer',
-    ];
+    protected $casts = ['id' => 'string', 'category_id' => 'integer', 'user_id' => 'integer',];
 
     public function getRouteKeyName()
     {
-    return 'slug';
+        return 'slug';
     }
 
     public function category(): BelongsTo
@@ -41,5 +38,15 @@ class Article extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeYear(Builder $query, $year)
+    {
+        return $query->whereYear('created_at', $year);
+    }
+
+    public function scopeMonth(Builder $query, $month)
+    {
+        return $query->whereMonth('created_at', $month);
     }
 }
