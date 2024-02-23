@@ -7,9 +7,7 @@ use App\Http\Requests\SaveArticleRequest;
 use App\Http\Resources\ArticleCollection;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Str;
 
 class ArticleController extends Controller
 {
@@ -18,17 +16,31 @@ class ArticleController extends Controller
         return ArticleResource::make($article);
     }
 
-    public function index(Request $request): ArticleCollection
+    public function index(): ArticleCollection
     {
-        $sortField = $request->input('sort');
 
-        $sortDirection = Str::of($sortField)->startsWith('-') ? 'desc' : 'asc';
+        $articles = Article::query();
 
-        $sortField = ltrim($sortField, '-');
+        $allowedFilters = ['title', 'content', 'year', 'month'];
 
-        $articles = Article::orderBy($sortField, $sortDirection)->get();
+        foreach (request('filter', []) as $filter => $value) {
+            abort_unless(in_array($filter, $allowedFilters), 400, "The filter '{$filter}' is not allowed");
 
-        return ArticleCollection::make($articles);
+            if ($filter === 'year') {
+                $articles->whereYear('created_at', $value);
+
+            } elseif ($filter === 'month') {
+                $articles->whereMonth('created_at', $value);
+
+            } else {
+                $articles->where($filter, 'LIKE', '%' . $value . '%');
+
+            }
+        }
+
+        $articles->allowedSorts(['title', 'content']);
+
+        return ArticleCollection::make($articles->jsonPaginate());
 
     }
 
@@ -42,6 +54,7 @@ class ArticleController extends Controller
     public function update(SaveArticleRequest $request, Article $article): ArticleResource
     {
         $article->update($request->validated());
+
         return ArticleResource::make($article);
     }
 
