@@ -129,4 +129,5 @@ class PaginateArticlesTest extends TestCase
         $this->assertStringContainsString('filter[title]=laravel', $nextLink);
 
     }
+
 }
